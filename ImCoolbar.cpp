@@ -55,13 +55,12 @@ static float getCursorOffset() {
     return offset;
 }
 
-IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, const ImCoolBarFlags& vFlags, const ImCoolBarConfig& vConfig) {
-    ImGuiWindowFlags flags =                 //
-        ImGuiWindowFlags_NoTitleBar |        //
-        ImGuiWindowFlags_NoScrollbar |       //
-        ImGuiWindowFlags_AlwaysAutoResize |  //
-        ImGuiWindowFlags_NoDocking;          //
-
+IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, const ImCoolBarConfig& vConfig, ImGuiWindowFlags vFlags) {
+    ImGuiWindowFlags flags = vFlags |                             //
+                             ImGuiWindowFlags_NoTitleBar |        //
+                             ImGuiWindowFlags_NoScrollbar |       //
+                             ImGuiWindowFlags_AlwaysAutoResize |  //
+                             ImGuiWindowFlags_NoDocking;          //
     bool res = ImGui::Begin(vLabel, nullptr, flags);
 
     if (!res) {
@@ -69,8 +68,9 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, const ImCoolBarFlags& vFl
     } else {
         ImGuiContext& g     = *GImGui;
         ImGuiWindow* window = GetCurrentWindow();
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
         window->StateStorage.SetInt(window->GetID("##CoolBarItemIndex"), 0);
-        window->StateStorage.SetInt(window->GetID("##CoolBarFlag"), vFlags);
+        window->StateStorage.SetInt(window->GetID("##CoolBarFlag"), vCBFlags);
         window->StateStorage.SetFloat(window->GetID("##CoolBarAnchorX"), vConfig.anchor.x);
         window->StateStorage.SetFloat(window->GetID("##CoolBarAnchorY"), vConfig.anchor.y);
         //window->StateStorage.SetFloat(window->GetID("##CoolBarAnimStep"), vConfig.anim_step);
@@ -78,9 +78,9 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, const ImCoolBarFlags& vFl
         window->StateStorage.SetFloat(window->GetID("##CoolBarHoveredSize"), vConfig.hovered_size);
 
         const auto& bar_size   = ImGui::GetWindowSize();
-        const float& offset_x = (ImGui::GetIO().DisplaySize.x - bar_size.x) * vConfig.anchor.x;
-        const float& offset_y  = (ImGui::GetIO().DisplaySize.y - bar_size.y) * vConfig.anchor.y;
-        ImGui::SetWindowPos(ImVec2(offset_x, offset_y));
+        const float& offset_x = (viewport->Size.x - bar_size.x) * vConfig.anchor.x;
+        const float& offset_y  = (viewport->Size.y - bar_size.y) * vConfig.anchor.y;
+        ImGui::SetWindowPos(ImVec2(offset_x, offset_y) + viewport->Pos);
 
         if (isWindowHovered(window)) {
             const float& anim_value = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimValue"));
@@ -92,12 +92,6 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, const ImCoolBarFlags& vFl
             if (anim_value > 0.0f) {
                 window->StateStorage.SetFloat(window->GetID("##CoolBarAnimValue"), anim_value - vConfig.anim_step);
             }
-        }
-
-        if (vFlags & ImCoolBar_Horizontal) {
-            ImGui::SetCursorPosY(g.Style.WindowPadding.y);
-        } else {
-            ImGui::SetCursorPosX(g.Style.WindowPadding.x);
         }
     }
 

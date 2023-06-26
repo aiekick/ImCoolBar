@@ -42,8 +42,7 @@ struct IMGUI_API ImCoolBarConfig {
     ImCoolBarConfig(const ImVec2 vAnchor = ImVec2(-1.0f, -1.0f), const float& vNormalSize = 40.0f, const float& vHoveredSize = 60.0f, const float& vAnimStep = 0.05f) 
         : anchor(vAnchor), normal_size(vNormalSize), hovered_size(vHoveredSize), anim_step(vAnimStep) {}
 };
-
-IMGUI_API bool BeginCoolBar(const char* vLabel, const ImCoolBarFlags& vFlags = ImCoolBar_Vertical, const ImCoolBarConfig& vConfig = {});
+IMGUI_API bool BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags = ImCoolBar_Vertical, const ImCoolBarConfig& vConfig = {}, ImGuiWindowFlags vFlags = ImGuiWindowFlags_None);
 IMGUI_API void EndCoolBar();
 IMGUI_API bool CoolBarItem(const char* vLabel);
 IMGUI_API float GetCoolBarItemWidth();
