@@ -124,7 +124,7 @@ void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabe
         size_t idx = 0U;
         for (const auto& arr : vAppDatas.textures) {
             if (idx++ < vMaxIcons) {
-                if (ImGui::CoolBarItem(arr.first.c_str())) {
+                if (ImGui::CoolBarItem()) {
                     float w = ImGui::GetCoolBarItemWidth();
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4());
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4());
@@ -193,7 +193,7 @@ int main(int, char**) {
     ImFontConfig icons_config;
     icons_config.MergeMode  = true;
     icons_config.PixelSnapH = true;
-    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFD, 15.0f, &icons_config, icons_ranges);
+    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFD, 50.0f, &icons_config, icons_ranges);
 
     const std::vector<std::string> icons_name = {
         "Settings",   //
@@ -233,30 +233,54 @@ int main(int, char**) {
         drawCoolBar(_appDatas, 6, "Left##CoolBarMainWin", ImCoolBar_Vertical, {ImVec2(0.0f, 0.5f), 50.0f, 60.0f});
         drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBar_Vertical, {ImVec2(1.0f, 0.5f), 50.0f, 60.0f});
 
+        auto coolbar_button     = [](const char* label) {
+            float w         = ImGui::GetCoolBarItemWidth();
+            auto font_ptr   = ImGui::GetIO().Fonts->Fonts[0];
+            font_ptr->Scale = ImGui::GetCoolBarItemScale();
+            ImGui::PushFont(font_ptr);
+            ImGui::Button(label, ImVec2(w, w));
+            ImGui::PopFont();
+        };
+
         if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBar_Horizontal, ImVec2(0.5f, 1.0f))) {
-            if (ImGui::CoolBarItem("ButtonA")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("A", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("A");
             }
-            if (ImGui::CoolBarItem("ButtonB")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("B", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("B");
             }
-            if (ImGui::CoolBarItem("ButtonC")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("C", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("C");
             }
-            if (ImGui::CoolBarItem("ButtonD")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("D", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("D");
             }
-            if (ImGui::CoolBarItem("ButtonE")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("E", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("E");
             }
-            if (ImGui::CoolBarItem("ButtonF")) {
-                float w = ImGui::GetCoolBarItemWidth();
-                ImGui::Button("F", ImVec2(w, w));
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("F");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("G");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("H");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("I");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("J");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("K");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("L");
+            }
+            if (ImGui::CoolBarItem()) {
+                coolbar_button("M");
             }
             ImGui::EndCoolBar();
         }
