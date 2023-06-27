@@ -31,13 +31,13 @@ SOFTWARE.
 #include <vector>
 #include <array>
 
-static float bubbleEffect(const float& v) {
-    return pow(cos(v * IM_PI * 0.5f), 12.0f);
+static float bubbleEffect(const float& vValue, const float& vStength) {
+    return pow(cos(vValue * IM_PI * vStength), 12.0f);
 }
 
 // https://codesandbox.io/s/motion-dock-forked-hs4p8d?file=/src/Dock.tsx
-static float getHoverSize(const float& v, const float& vNormalSize, const float& vHoveredSize, const float& vScale) {
-    return vNormalSize + (vHoveredSize - vNormalSize) * bubbleEffect(v) * vScale;
+static float getHoverSize(const float& vValue, const float& vNormalSize, const float& vHoveredSize, const float& vStength, const float& vScale) {
+    return vNormalSize + (vHoveredSize - vNormalSize) * bubbleEffect(vValue, vStength) * vScale;
 }
 
 static bool isWindowHovered(ImGuiWindow* vWindow) {
@@ -70,6 +70,7 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
         window->StateStorage.SetFloat(window->GetID("##CoolBarAnchorY"), vConfig.anchor.y);
         window->StateStorage.SetFloat(window->GetID("##CoolBarNormalSize"), vConfig.normal_size);
         window->StateStorage.SetFloat(window->GetID("##CoolBarHoveredSize"), vConfig.hovered_size);
+        window->StateStorage.SetFloat(window->GetID("##CoolBarEffectStrength"), vConfig.effect_strength);
 
         const auto& bar_size   = ImGui::GetWindowSize();
         const float& offset_x = (viewport->Size.x - bar_size.x) * vConfig.anchor.x;
@@ -106,14 +107,16 @@ IMGUI_API bool ImGui::CoolBarItem() {
     if (window->SkipItems)
         return false;
 
-    const auto& flags             = window->StateStorage.GetInt(window->GetID("##CoolBarFlags"));
     const auto& idx               = window->StateStorage.GetInt(window->GetID("##CoolBarItemIndex"));
-    const auto& anim_scale        = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimScale"));
-    const auto& normal_size       = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
-    const auto& hovered_size      = window->StateStorage.GetFloat(window->GetID("##CoolBarHoveredSize"));
     const auto& coolbar_id        = window->StateStorage.GetInt(window->GetID("##CoolBarID"));
     const auto& coolbar_item_id   = window->GetID(coolbar_id + idx + 1);
     const auto& current_item_size = window->StateStorage.GetFloat(coolbar_item_id);
+
+    const auto& flags             = window->StateStorage.GetInt(window->GetID("##CoolBarFlags"));
+    const auto& anim_scale        = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimScale"));
+    const auto& normal_size       = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
+    const auto& hovered_size      = window->StateStorage.GetFloat(window->GetID("##CoolBarHoveredSize"));
+    const auto& effect_strength   = window->StateStorage.GetInt(window->GetID("##CoolBarEffectStrength"));
 
     assert(normal_size > 0.0f);
 
@@ -132,7 +135,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     if (flags & ImCoolBarFlags_Horizontal) {
         const float& btn_center_x = ImGui::GetCursorScreenPos().x + current_item_size * 0.5f;
         const float& diff_pos     = (ImGui::GetMousePos().x - btn_center_x) / window->Size.x;
-        w                         = getHoverSize(diff_pos, normal_size, hovered_size, anim_scale);
+        w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
         const float& anchor_y     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorY"));
         const float& bar_height   = getBarSize(window, normal_size, hovered_size, anim_scale);
         float btn_offset_y        = (bar_height - w) * anchor_y + g.Style.WindowPadding.y;
@@ -140,7 +143,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     } else {
         const float& btn_center_y = ImGui::GetCursorScreenPos().y + current_item_size * 0.5f;
         const float& diff_pos     = (ImGui::GetMousePos().y - btn_center_y) / window->Size.y;
-        w                         = getHoverSize(diff_pos, normal_size, hovered_size, anim_scale);
+        w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
         const float& anchor_x     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorX"));
         const float& bar_width    = getBarSize(window, normal_size, hovered_size, anim_scale);
         float btn_offset_x        = (bar_width - w) * anchor_x + g.Style.WindowPadding.x;

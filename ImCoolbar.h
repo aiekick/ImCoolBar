@@ -37,10 +37,11 @@ enum ImCoolBarFlags_ {                     //
 namespace ImGui {
 
 struct IMGUI_API ImCoolBarConfig {
-    ImVec2 anchor      = ImVec2(-1.0f, -1.0f);
-    float normal_size  = 40.0f;
-    float hovered_size = 60.0f;
-    float anim_step    = 0.05f;
+    ImVec2 anchor         = ImVec2(-1.0f, -1.0f);
+    float normal_size     = 40.0f;
+    float hovered_size    = 60.0f;
+    float anim_step       = 0.05f;
+    float effect_strength = 0.5f;
     ImCoolBarConfig(const ImVec2 vAnchor = ImVec2(-1.0f, -1.0f), const float& vNormalSize = 40.0f, const float& vHoveredSize = 60.0f, const float& vAnimStep = 0.05f) 
         : anchor(vAnchor), normal_size(vNormalSize), hovered_size(vHoveredSize), anim_step(vAnimStep) {}
 };
