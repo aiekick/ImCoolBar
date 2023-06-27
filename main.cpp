@@ -114,7 +114,7 @@ struct AppDatas {
     TexturesContainer textures;
 };
 
-void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabel, const ImCoolBarFlags& vFlags = ImCoolBar_Vertical, const ImGui::ImCoolBarConfig& vConfig = {}) {
+void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabel, const ImCoolBarFlags& vFlags = ImCoolBarFlags_Vertical, const ImGui::ImCoolBarConfig& vConfig = {}) {
     ImGui::SetNextWindowBgAlpha(0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     bool opened = ImGui::BeginCoolBar(vLabel, vFlags, vConfig);
@@ -229,61 +229,71 @@ int main(int, char**) {
 
         drawBackground(background_id);
 
-        drawCoolBar(_appDatas, 11, "Top##CoolBarMainWin", ImCoolBar_Horizontal, {ImVec2(0.5f, 0.0f), 50.0f, 60.0f});
-        drawCoolBar(_appDatas, 6, "Left##CoolBarMainWin", ImCoolBar_Vertical, {ImVec2(0.0f, 0.5f), 50.0f, 60.0f});
-        drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBar_Vertical, {ImVec2(1.0f, 0.5f), 50.0f, 60.0f});
+        drawCoolBar(_appDatas, 11, "Top##CoolBarMainWin", ImCoolBarFlags_Horizontal, {ImVec2(0.5f, 0.0f), 50.0f, 60.0f});
+        drawCoolBar(_appDatas, 6, "Left##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(0.0f, 0.5f), 50.0f, 60.0f});
+        drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(1.0f, 0.5f), 50.0f, 60.0f});
 
         auto coolbar_button     = [](const char* label) {
             float w         = ImGui::GetCoolBarItemWidth();
             auto font_ptr   = ImGui::GetIO().Fonts->Fonts[0];
-            font_ptr->Scale = ImGui::GetCoolBarItemScale();
             ImGui::PushFont(font_ptr);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
+            font_ptr->Scale = ImGui::GetCoolBarItemScale();
+            ImGui::PopStyleVar();
             ImGui::Button(label, ImVec2(w, w));
             ImGui::PopFont();
         };
 
-        if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBar_Horizontal, ImVec2(0.5f, 1.0f))) {
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("A");
+        static ImGui::ImCoolBarConfig _config;
+        _config.normal_size  = 25.0f;
+        _config.hovered_size = 100.0f;
+        _config.anchor       = ImVec2(0.5f, 1.0f);
+        
+        if (ImGui::BeginViewportSideBar("BottomBar", ImGui::GetMainViewport(), ImGuiDir_Down, 40.0f, ImGuiWindowFlags_None)) {
+            if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBarFlags_Horizontal | ImCoolBarFlags_ChildFrame, _config)) {
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("A");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("B");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("C");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("D");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("E");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("F");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("G");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("H");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("I");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("J");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("K");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("L");
+                }
+                if (ImGui::CoolBarItem()) {
+                    coolbar_button("M");
+                }
+                ImGui::EndCoolBar();
             }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("B");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("C");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("D");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("E");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("F");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("G");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("H");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("I");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("J");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("K");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("L");
-            }
-            if (ImGui::CoolBarItem()) {
-                coolbar_button("M");
-            }
-            ImGui::EndCoolBar();
         }
+        ImGui::End();      
 
         if (_appDatas.show_app_metrics) {
             ImGui::ShowMetricsWindow(&_appDatas.show_app_metrics);
