@@ -44,7 +44,7 @@ struct IMGUI_API ImCoolBarConfig {
 };
 IMGUI_API bool BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags = ImCoolBar_Vertical, const ImCoolBarConfig& vConfig = {}, ImGuiWindowFlags vFlags = ImGuiWindowFlags_None);
 IMGUI_API void EndCoolBar();
-IMGUI_API bool CoolBarItem(const char* vLabel);
+IMGUI_API bool CoolBarItem();
 IMGUI_API float GetCoolBarItemWidth();
 IMGUI_API float GetCoolBarItemScale();
 
