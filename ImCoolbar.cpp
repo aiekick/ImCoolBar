@@ -118,6 +118,8 @@ IMGUI_API bool ImGui::CoolBarItem(const char* vLabel) {
     const auto& normal_size  = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
     const auto& hovered_size = window->StateStorage.GetFloat(window->GetID("##CoolBarHoveredSize"));
 
+    assert(normal_size > 0.0f);
+
     if (flag & ImCoolBar_Horizontal) {
         if (idx) {
             ImGui::SameLine();
@@ -152,6 +154,7 @@ IMGUI_API bool ImGui::CoolBarItem(const char* vLabel) {
     window->StateStorage.SetInt(window->GetID("##CoolBarItemIndex"), idx + 1);
     window->StateStorage.SetFloat(window->GetID(vLabel), w);
     window->StateStorage.SetFloat(window->GetID("##CoolBarItemCurrentSize"), w);
+    window->StateStorage.SetFloat(window->GetID("##CoolBarItemCurrentScale"), w / normal_size);
     return true;
 }
 
@@ -160,4 +163,10 @@ IMGUI_API float ImGui::GetCoolBarItemWidth() {
     if (window->SkipItems)
         return 0.0f;
     return window->StateStorage.GetFloat(window->GetID("##CoolBarItemCurrentSize"));
+}
+
+IMGUI_API float ImGui::GetCoolBarItemScale() {
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems) return 0.0f;
+    return window->StateStorage.GetFloat(window->GetID("##CoolBarItemCurrentScale"));
 }

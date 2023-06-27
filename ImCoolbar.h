@@ -46,5 +46,6 @@ IMGUI_API bool BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags = ImCool
 IMGUI_API void EndCoolBar();
 IMGUI_API bool CoolBarItem(const char* vLabel);
 IMGUI_API float GetCoolBarItemWidth();
+IMGUI_API float GetCoolBarItemScale();
 
 }  // namespace ImGui
