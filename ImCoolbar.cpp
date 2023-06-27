@@ -111,7 +111,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     const auto& anim_scale        = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimScale"));
     const auto& normal_size       = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
     const auto& hovered_size      = window->StateStorage.GetFloat(window->GetID("##CoolBarHoveredSize"));
-    const auto& coolbar_id        = window->StateStorage.GetFloat(window->GetID("##CoolBarID"));
+    const auto& coolbar_id        = window->StateStorage.GetInt(window->GetID("##CoolBarID"));
     const auto& coolbar_item_id   = window->GetID(coolbar_id + idx + 1);
     const auto& current_item_size = window->StateStorage.GetFloat(coolbar_item_id);
 
