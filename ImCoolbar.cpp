@@ -116,7 +116,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     const auto& anim_scale        = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimScale"));
     const auto& normal_size       = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
     const auto& hovered_size      = window->StateStorage.GetFloat(window->GetID("##CoolBarHoveredSize"));
-    const auto& effect_strength   = window->StateStorage.GetInt(window->GetID("##CoolBarEffectStrength"));
+    const auto& effect_strength   = window->StateStorage.GetFloat(window->GetID("##CoolBarEffectStrength"));
 
     assert(normal_size > 0.0f);
 
