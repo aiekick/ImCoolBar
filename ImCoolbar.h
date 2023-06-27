@@ -26,10 +26,12 @@ SOFTWARE.
 
 #include "imgui.h"
 
-typedef int ImCoolBarFlags;  //
-enum ImCoolBarFlags_ {       //
-    ImCoolBar_Vertical = 0,  //
-    ImCoolBar_Horizontal     //
+typedef int ImCoolBarFlags;                //
+enum ImCoolBarFlags_ {                     //
+    ImCoolBarFlags_None       = 0,         //
+    ImCoolBarFlags_Vertical   = (1 << 0),  //
+    ImCoolBarFlags_Horizontal = (1 << 1),  //
+    ImCoolBarFlags_ChildFrame = (1 << 2),  //
 };
 
 namespace ImGui {
@@ -42,7 +44,7 @@ struct IMGUI_API ImCoolBarConfig {
     ImCoolBarConfig(const ImVec2 vAnchor = ImVec2(-1.0f, -1.0f), const float& vNormalSize = 40.0f, const float& vHoveredSize = 60.0f, const float& vAnimStep = 0.05f) 
         : anchor(vAnchor), normal_size(vNormalSize), hovered_size(vHoveredSize), anim_step(vAnimStep) {}
 };
-IMGUI_API bool BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags = ImCoolBar_Vertical, const ImCoolBarConfig& vConfig = {}, ImGuiWindowFlags vFlags = ImGuiWindowFlags_None);
+IMGUI_API bool BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags = ImCoolBarFlags_Vertical, const ImCoolBarConfig& vConfig = {}, ImGuiWindowFlags vFlags = ImGuiWindowFlags_None);
 IMGUI_API void EndCoolBar();
 IMGUI_API bool CoolBarItem();
 IMGUI_API float GetCoolBarItemWidth();

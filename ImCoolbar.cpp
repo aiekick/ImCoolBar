@@ -32,12 +32,12 @@ SOFTWARE.
 #include <array>
 
 static float bubbleEffect(const float& v) {
-    return ImMax(pow(cos(v * IM_PI * 0.5f), 24.0f), 0.0f);
+    return pow(cos(v * IM_PI * 0.5f), 12.0f);
 }
 
 // https://codesandbox.io/s/motion-dock-forked-hs4p8d?file=/src/Dock.tsx
 static float getHoverSize(const float& v, const float& vNormalSize, const float& vHoveredSize, const float& vScale) {
-    return vNormalSize + vHoveredSize * bubbleEffect(v) * vScale;
+    return vNormalSize + (vHoveredSize - vNormalSize) * bubbleEffect(v) * vScale;
 }
 
 static bool isWindowHovered(ImGuiWindow* vWindow) {
@@ -45,13 +45,18 @@ static bool isWindowHovered(ImGuiWindow* vWindow) {
 }
 
 IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, const ImCoolBarConfig& vConfig, ImGuiWindowFlags vFlags) {
-    ImGuiWindowFlags flags = vFlags |                             //
-                             ImGuiWindowFlags_NoTitleBar |        //
-                             ImGuiWindowFlags_NoScrollbar |       //
-                             ImGuiWindowFlags_AlwaysAutoResize |  //
-                             ImGuiWindowFlags_NoDocking;          //
+    ImGuiWindowFlags flags = vFlags |                               //
+                             ImGuiWindowFlags_NoTitleBar |          //
+                             ImGuiWindowFlags_NoScrollbar |         //
+                             ImGuiWindowFlags_AlwaysAutoResize |    //
+                             ImGuiWindowFlags_NoCollapse |          //
+                             ImGuiWindowFlags_NoMove |              //
+                             ImGuiWindowFlags_NoSavedSettings |     //
+                             ImGuiWindowFlags_NoFocusOnAppearing |  //
+                             ImGuiWindowFlags_DockNodeHost |        //
+                             ImGuiWindowFlags_NoBackground |        //
+                             ImGuiWindowFlags_NoDocking;            //
     bool res = ImGui::Begin(vLabel, nullptr, flags);
-
     if (!res) {
         ImGui::End();
     } else {
@@ -59,7 +64,7 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
         ImGuiWindow* window = GetCurrentWindow();
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         window->StateStorage.SetInt(window->GetID("##CoolBarItemIndex"), 0);
-        window->StateStorage.SetInt(window->GetID("##CoolBarFlag"), vCBFlags);
+        window->StateStorage.SetInt(window->GetID("##CoolBarFlags"), vCBFlags);
         window->StateStorage.SetInt(window->GetID("##CoolBarID"), window->GetID(vLabel));
         window->StateStorage.SetFloat(window->GetID("##CoolBarAnchorX"), vConfig.anchor.x);
         window->StateStorage.SetFloat(window->GetID("##CoolBarAnchorY"), vConfig.anchor.y);
@@ -101,7 +106,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     if (window->SkipItems)
         return false;
 
-    const auto& flag              = window->StateStorage.GetInt(window->GetID("##CoolBarFlag"));
+    const auto& flags             = window->StateStorage.GetInt(window->GetID("##CoolBarFlags"));
     const auto& idx               = window->StateStorage.GetInt(window->GetID("##CoolBarItemIndex"));
     const auto& anim_scale        = window->StateStorage.GetFloat(window->GetID("##CoolBarAnimScale"));
     const auto& normal_size       = window->StateStorage.GetFloat(window->GetID("##CoolBarNormalSize"));
@@ -112,7 +117,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
 
     assert(normal_size > 0.0f);
 
-    if (flag & ImCoolBar_Horizontal) {
+    if (flags & ImCoolBarFlags_Horizontal) {
         if (idx) {
             ImGui::SameLine();
         }
@@ -121,21 +126,20 @@ IMGUI_API bool ImGui::CoolBarItem() {
     float w         = normal_size;
     ImGuiContext& g = *GImGui;
 
-    if (flag & ImCoolBar_Horizontal) {
-        const float& mouse_pos    = ImGui::GetMousePos().x;
-        const float& dock_width   = window->Size.x;
+    // Can be Horizontal or Vertical, not both
+    assert((flags & ImCoolBarFlags_Horizontal) || (flags & ImCoolBarFlags_Vertical));
+
+    if (flags & ImCoolBarFlags_Horizontal) {
         const float& btn_center_x = ImGui::GetCursorScreenPos().x + current_item_size * 0.5f;
-        const float& diff_pos     = (mouse_pos - btn_center_x) / dock_width;
+        const float& diff_pos     = (ImGui::GetMousePos().x - btn_center_x) / window->Size.x;
         w                         = getHoverSize(diff_pos, normal_size, hovered_size, anim_scale);
         const float& anchor_y     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorY"));
         const float& bar_height   = getBarSize(window, normal_size, hovered_size, anim_scale);
         float btn_offset_y        = (bar_height - w) * anchor_y + g.Style.WindowPadding.y;
         ImGui::SetCursorPosY(btn_offset_y);
     } else {
-        const float& mouse_pos    = ImGui::GetMousePos().y;
-        const float& dock_height  = window->Size.y;
         const float& btn_center_y = ImGui::GetCursorScreenPos().y + current_item_size * 0.5f;
-        const float& diff_pos     = (mouse_pos - btn_center_y) / dock_height;
+        const float& diff_pos     = (ImGui::GetMousePos().y - btn_center_y) / window->Size.y;
         w                         = getHoverSize(diff_pos, normal_size, hovered_size, anim_scale);
         const float& anchor_x     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorX"));
         const float& bar_width    = getBarSize(window, normal_size, hovered_size, anim_scale);
