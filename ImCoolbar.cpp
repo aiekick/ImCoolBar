@@ -154,6 +154,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     window->StateStorage.SetFloat(coolbar_item_id, w);
     window->StateStorage.SetFloat(window->GetID("##CoolBarItemCurrentSize"), w);
     window->StateStorage.SetFloat(window->GetID("##CoolBarItemCurrentScale"), w / normal_size);
+
     return true;
 }
 
