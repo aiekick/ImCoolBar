@@ -31,6 +31,8 @@ SOFTWARE.
 #include <vector>
 #include <array>
 
+//#define ENABLE_DEBUG
+
 static float bubbleEffect(const float& vValue, const float& vStength) {
     return pow(cos(vValue * IM_PI * vStength), 12.0f);
 }
@@ -52,9 +54,9 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
                              ImGuiWindowFlags_NoCollapse |          //
                              ImGuiWindowFlags_NoMove |              //
                              ImGuiWindowFlags_NoSavedSettings |     //
+                             ImGuiWindowFlags_NoBackground |        //
                              ImGuiWindowFlags_NoFocusOnAppearing |  //
                              ImGuiWindowFlags_DockNodeHost |        //
-                             ImGuiWindowFlags_NoBackground |        //
                              ImGuiWindowFlags_NoDocking;            //
     bool res = ImGui::Begin(vLabel, nullptr, flags);
     if (!res) {
@@ -132,22 +134,41 @@ IMGUI_API bool ImGui::CoolBarItem() {
     // Can be Horizontal or Vertical, not both
     assert((flags & ImCoolBarFlags_Horizontal) || (flags & ImCoolBarFlags_Vertical));
 
-    if (flags & ImCoolBarFlags_Horizontal) {
-        const float& btn_center_x = ImGui::GetCursorScreenPos().x + current_item_size * 0.5f;
-        const float& diff_pos     = (ImGui::GetMousePos().x - btn_center_x) / window->Size.x;
-        w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
-        const float& anchor_y     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorY"));
-        const float& bar_height   = getBarSize(window, normal_size, hovered_size, anim_scale);
-        float btn_offset_y        = (bar_height - w) * anchor_y + g.Style.WindowPadding.y;
-        ImGui::SetCursorPosY(btn_offset_y);
-    } else {
-        const float& btn_center_y = ImGui::GetCursorScreenPos().y + current_item_size * 0.5f;
-        const float& diff_pos     = (ImGui::GetMousePos().y - btn_center_y) / window->Size.y;
-        w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
-        const float& anchor_x     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorX"));
-        const float& bar_width    = getBarSize(window, normal_size, hovered_size, anim_scale);
-        float btn_offset_x        = (bar_width - w) * anchor_x + g.Style.WindowPadding.x;
-        ImGui::SetCursorPosX(btn_offset_x);
+#ifdef ENABLE_DEBUG
+    char buf[256 + 1];
+    const auto& color = ImGui::GetColorU32(ImVec4(0, 0, 1, 1));
+#endif
+
+    if (isWindowHovered(window) || anim_scale > 0.0f) {
+        if (flags & ImCoolBarFlags_Horizontal) {
+            const float& btn_center_x = ImGui::GetCursorScreenPos().x + current_item_size * 0.5f;
+            const float& diff_pos     = (ImGui::GetMousePos().x - btn_center_x) / window->Size.x;
+            w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
+            const float& anchor_y     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorY"));
+            const float& bar_height   = getBarSize(window, normal_size, hovered_size, anim_scale);
+            float btn_offset_y        = (bar_height - w) * anchor_y + g.Style.WindowPadding.y;
+            ImGui::SetCursorPosY(btn_offset_y);
+#ifdef ENABLE_DEBUG
+            ImFormatString(buf, 256, "%.3f", diff_pos);
+            const auto& bug_size = ImGui::CalcTextSize(buf);
+            window->DrawList->AddText(ImVec2(btn_center_x - bug_size.x * 0.5f, window->Pos.y + window->Size.y * (1.0f - anchor_y)), color, buf);
+            window->DrawList->AddLine(ImVec2(btn_center_x, window->Pos.y), ImVec2(btn_center_x, window->Pos.y + window->Size.y), color, 2.0f);
+#endif
+        } else {
+            const float& btn_center_y = ImGui::GetCursorScreenPos().y + current_item_size * 0.5f;
+            const float& diff_pos     = (ImGui::GetMousePos().y - btn_center_y) / window->Size.y;
+            w                         = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
+            const float& anchor_x     = window->StateStorage.GetFloat(window->GetID("##CoolBarAnchorX"));
+            const float& bar_width    = getBarSize(window, normal_size, hovered_size, anim_scale);
+            float btn_offset_x        = (bar_width - w) * anchor_x + g.Style.WindowPadding.x;
+            ImGui::SetCursorPosX(btn_offset_x);
+#ifdef ENABLE_DEBUG
+            ImFormatString(buf, 256, "%.3f", diff_pos);
+            const auto& bug_size = ImGui::CalcTextSize(buf);
+            window->DrawList->AddText(ImVec2(window->Pos.x + window->Size.x * (1.0f - anchor_x), btn_center_y), color, buf);
+            window->DrawList->AddLine(ImVec2(window->Pos.x, btn_center_y), ImVec2(window->Pos.x + window->Size.x, btn_center_y), color, 2.0f);
+#endif
+        }
     }
 
     window->StateStorage.SetInt(window->GetID("##CoolBarItemIndex"), idx + 1);
