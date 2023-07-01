@@ -120,6 +120,21 @@ void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabe
     bool opened = ImGui::BeginCoolBar(vLabel, vFlags, vConfig);
     ImGui::PopStyleVar();
     if (opened) {
+        auto window = ImGui::GetCurrentWindow();
+        if (window) {
+            // correct the rect of the window. maybe a bug on imgui..
+            // the workrect can cause issue when clikc a timeline
+            // channel close button when close to the toolbar
+            // this thing correct the issue
+            const auto& rc            = window->Rect();
+            window->WorkRect          = rc;
+            window->OuterRectClipped  = rc;
+            window->InnerRect         = rc;
+            window->InnerClipRect     = rc;
+            window->ParentWorkRect    = rc;
+            window->ClipRect          = rc;
+            window->ContentRegionRect = rc;
+        }
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
         size_t idx = 0U;
         for (const auto& arr : vAppDatas.textures) {
@@ -229,18 +244,22 @@ int main(int, char**) {
 
         drawBackground(background_id);
 
-        drawCoolBar(_appDatas, 11, "Top##CoolBarMainWin", ImCoolBarFlags_Horizontal, {ImVec2(0.5f, 0.0f), 50.0f, 60.0f});
-        drawCoolBar(_appDatas, 6, "Left##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(0.0f, 0.5f), 50.0f, 60.0f});
-        drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(1.0f, 0.5f), 50.0f, 60.0f});
+        drawCoolBar(_appDatas, 11, "Top##CoolBarMainWin", ImCoolBarFlags_Horizontal, {ImVec2(0.5f, 0.0f), 50.0f, 100.0f});
+        drawCoolBar(_appDatas, 6, "Left##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(0.0f, 0.5f), 50.0f, 100.0f});
+        drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBarFlags_Vertical, {ImVec2(1.0f, 0.5f), 50.0f, 100.0f});
 
-        auto coolbar_button     = [](const char* label) {
+        const float& ref_font_scale = ImGui::GetIO().Fonts->Fonts[0]->Scale;
+
+        auto coolbar_button = [ref_font_scale](const char* label) {
             float w         = ImGui::GetCoolBarItemWidth();
             auto font_ptr   = ImGui::GetIO().Fonts->Fonts[0];
+            //font_ptr->Scale = ref_font_scale;
             ImGui::PushFont(font_ptr);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
-            font_ptr->Scale = ImGui::GetCoolBarItemScale();
             ImGui::PopStyleVar();
+            font_ptr->Scale = ImGui::GetCoolBarItemScale();
             ImGui::Button(label, ImVec2(w, w));
+            font_ptr->Scale = ref_font_scale;
             ImGui::PopFont();
         };
 
@@ -248,9 +267,25 @@ int main(int, char**) {
         _config.normal_size  = 25.0f;
         _config.hovered_size = 100.0f;
         _config.anchor       = ImVec2(0.5f, 1.0f);
-        
-        if (ImGui::BeginViewportSideBar("BottomBar", ImGui::GetMainViewport(), ImGuiDir_Down, 40.0f, ImGuiWindowFlags_None)) {
-            if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBarFlags_Horizontal | ImCoolBarFlags_ChildFrame, _config)) {
+
+        ImGui::GetIO().Fonts->Fonts[0]->Scale = ref_font_scale;
+        ImGuiWindowFlags window_flags         = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings ;
+        if (ImGui::BeginViewportSideBar("BottomBar", ImGui::GetMainViewport(), ImGuiDir_Down, 40.0f, window_flags)) {
+            if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBarFlags_Horizontal, _config)) {
+                auto window = ImGui::GetCurrentWindow();
+                if (window) {
+                    // correct the rect of the window. maybe a bug on imgui !?
+                    // the workrect can cause issue when click around
+                    // this thing correct the issue
+                    const auto& rc            = window->Rect();
+                    window->WorkRect          = rc;
+                    window->OuterRectClipped  = rc;
+                    window->InnerRect         = rc;
+                    window->InnerClipRect     = rc;
+                    window->ParentWorkRect    = rc;
+                    window->ClipRect          = rc;
+                    window->ContentRegionRect = rc;
+                }
                 if (ImGui::CoolBarItem()) {
                     coolbar_button("A");
                 }
@@ -293,7 +328,7 @@ int main(int, char**) {
                 ImGui::EndCoolBar();
             }
         }
-        ImGui::End();      
+        ImGui::End();
 
         if (_appDatas.show_app_metrics) {
             ImGui::ShowMetricsWindow(&_appDatas.show_app_metrics);
