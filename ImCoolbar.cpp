@@ -31,7 +31,7 @@ SOFTWARE.
 #include <array>
 #include <algorithm>
 
-#include "../imgui_internal.h"
+#include "imgui_internal.h"
 #include "ImCoolBar.h"
 
 #define USE_DOCKING  false;
