@@ -35,7 +35,7 @@ enum ImCoolBarFlags_ {                     //
 
 namespace ImGui {
 
-struct IMGUI_API ImCoolBarConfig {
+struct ImCoolBarConfig {
     ImVec2 anchor         = ImVec2(-1.0f, -1.0f);             //
     float normal_size     = 40.0f;                            //
     float hovered_size    = 60.0f;                            //
