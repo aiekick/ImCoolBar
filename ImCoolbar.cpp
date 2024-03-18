@@ -62,7 +62,6 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
     if (!res) {
         ImGui::End();
     } else {
-        ImGuiContext& g     = *GImGui;
         ImGuiWindow* window = GetCurrentWindow();
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         window->StateStorage.SetInt(window->GetID("##CoolBarItemIndex"), 0);
@@ -99,8 +98,7 @@ IMGUI_API void ImGui::EndCoolBar() {
     ImGui::End();
 }
 
-static float getBarSize(ImGuiWindow* vWindow, const float& vNormalSize, const float& vHoveredSize, const float& vScale) {
-    ImGuiContext& g = *GImGui;
+static float getBarSize(ImGuiWindow* /*vWindow*/, const float& vNormalSize, const float& vHoveredSize, const float& vScale) {
     return vNormalSize + vHoveredSize * vScale;
 }
 
