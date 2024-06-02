@@ -4,3 +4,5 @@
 /cmake-build-release/
 /.idea/
 build
+/bin/*.exe
+/bin/debug/*.pdb
