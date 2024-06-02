@@ -6,3 +6,4 @@
 build
 /bin/*.exe
 /bin/debug/*.pdb
+/bin/*.ini
