@@ -11,7 +11,7 @@
 
 #include "3rdparty/imgui/backends/imgui_impl_opengl3.h"
 #include "3rdparty/imgui/backends/imgui_impl_glfw.h"
-#include <ImCoolbar/ImCoolbar.h>
+#include <ImCoolBar/ImCoolBar.h>
 #include "CustomFont.cpp"
 #include <stdio.h>
 #include <sstream>
@@ -239,8 +239,6 @@ int main(int, char**) {
     for (const auto& name : icons_name) {
         _appDatas.textures.push_back(std::make_pair(name, loadTexture("res/" + name + ".png")));
     }
-
-    const char* imCoolBarTitle = "##CoolBarMainWin";
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();

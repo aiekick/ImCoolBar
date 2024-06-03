@@ -19,5 +19,5 @@ jobs:
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: ImCoolBar_App_WIn32
-        path: build\Release\ImCoolBar_App_WIn32.exe
+        name: ImCoolBarApp_Windows_x64
+        path: bin\ImCoolBarApp_Windows_x64.exe
