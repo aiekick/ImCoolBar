@@ -61,5 +61,6 @@ IMGUI_API void EndCoolBar();
 IMGUI_API bool CoolBarItem();
 IMGUI_API float GetCoolBarItemWidth();
 IMGUI_API float GetCoolBarItemScale();
+IMGUI_API void ShowCoolBarMetrics(bool* vOpened);
 
 }  // namespace ImGui
