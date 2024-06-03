@@ -36,16 +36,16 @@ SOFTWARE.
 
 #ifdef _MSC_VER
 #include <Windows.h>
-#define IM_DEBUG_BREAK       \
+#define ICB_DEBUG_BREAK       \
     if (IsDebuggerPresent()) \
     __debugbreak()
 #else
-#define IM_DEBUG_BREAK
+#define ICB_DEBUG_BREAK
 #endif
 
 #define BREAK_ON_KEY(KEY)         \
     if (ImGui::IsKeyPressed(KEY)) \
-    IM_DEBUG_BREAK
+    ICB_DEBUG_BREAK
 
 static float bubbleEffect(const float vValue, const float vStength) {
     return pow(cos(vValue * IM_PI * vStength), 12.0f);
