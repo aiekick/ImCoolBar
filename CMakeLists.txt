@@ -5,6 +5,8 @@ set(PROJECT ImCoolBarApp)
 enable_language(C CXX)
 project(${PROJECT} CXX)
 
+option(ENABLED_DEBUG "Enable the debug mode" OFF)
+
 include(cmake/3rdparty.cmake)
 
 if(MSVC)
@@ -18,7 +20,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 ## some defines for debug mode (before 3rdparty.cmake)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG -DENABLE_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+
+if (ENABLED_DEBUG)
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_IMCOOLBAR_DEBUG")
+endif()
 
 set(FINAL_BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_PDB_OUTPUT_DIRECTORY_DEBUG "${FINAL_BIN_DIR}/debug")
@@ -31,7 +37,6 @@ set(CMAKE_INSTALL_BINDIR .)
 
 add_definitions(${GLFW_DEFINITIONS})
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-
 
 ## for group smake targets in the dir CmakeTargets
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
