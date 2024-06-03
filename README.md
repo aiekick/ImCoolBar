@@ -1,3 +1,7 @@
+[![Win](https://github.com/aiekick/ImCoolBar/actions/workflows/Win.yml/badge.svg)](https://github.com/aiekick/ImCoolBar/actions/workflows/Win.yml)
+[![Linux](https://github.com/aiekick/ImCoolBar/actions/workflows/Linux.yml/badge.svg)](https://github.com/aiekick/ImCoolBar/actions/workflows/Linux.yml)
+[![Osx](https://github.com/aiekick/ImCoolBar/actions/workflows/Osx.yml/badge.svg)](https://github.com/aiekick/ImCoolBar/actions/workflows/Osx.yml)
+
 # ImCoolbar
 
 # Minimal Sample
