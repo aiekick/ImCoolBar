@@ -107,7 +107,7 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
 
         ImGuiContext& g = *GImGui;
         ImGuiWindow* window_ptr = GetCurrentWindow();
-        window_ptr->StateStorage.SetVoidPtr(window_ptr->GetID(ICB_PREFIX "Type"), "ImCoolBar");
+        window_ptr->StateStorage.SetVoidPtr(window_ptr->GetID(ICB_PREFIX "Type"), (void*)"ImCoolBar");
         window_ptr->StateStorage.SetInt(window_ptr->GetID(ICB_PREFIX "ItemIdx"), 0);
         window_ptr->StateStorage.SetInt(window_ptr->GetID(ICB_PREFIX "Flags"), vCBFlags);
         window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "Anchor"), getChannelInv(vConfig.anchor, vCBFlags));
