@@ -60,9 +60,8 @@ static bool isWindowHovered(ImGuiWindow* vWindow) {
     return ImGui::IsMouseHoveringRect(vWindow->Rect().Min, vWindow->Rect().Max);
 }
 
-static float getBarSize(ImGuiWindow* vWindow, const float vNormalSize, const float vHoveredSize, const float vScale) {
-    ImGuiContext& g = *GImGui;
-    return vNormalSize + vHoveredSize * vScale;
+static float getBarSize(const float vNormalSize, const float vHoveredSize, const float vScale) {
+    return vNormalSize + (vHoveredSize - vNormalSize) * vScale;
 }
 
 static float getChannel(const ImVec2& vVec, const ImCoolBarFlags vCBFlags) {
@@ -110,15 +109,15 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
         window_ptr->StateStorage.SetVoidPtr(window_ptr->GetID(ICB_PREFIX "Type"), (void*)"ImCoolBar");
         window_ptr->StateStorage.SetInt(window_ptr->GetID(ICB_PREFIX "ItemIdx"), 0);
         window_ptr->StateStorage.SetInt(window_ptr->GetID(ICB_PREFIX "Flags"), vCBFlags);
-        window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "Anchor"), getChannelInv(vConfig.anchor, vCBFlags));
+
+        {
+            const float anchor = ImClamp(getChannelInv(vConfig.anchor, vCBFlags), 0.0f, 1.0f);
+            window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "Anchor"), anchor);
+        }
+        
         window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "NormalSize"), vConfig.normal_size);
         window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "HoveredSize"), vConfig.hovered_size);
         window_ptr->StateStorage.SetFloat(window_ptr->GetID(ICB_PREFIX "EffectStrength"), vConfig.effect_strength);
-
-        const auto bar_size = window_ptr->ContentSize + ImGui::GetStyle().WindowPadding * 2.0f;
-        const auto viewport_ptr = window_ptr->Viewport;
-        const auto new_pos = viewport_ptr->Pos + (viewport_ptr->Size - bar_size) * vConfig.anchor;
-        ImGui::SetWindowPos(new_pos);
 
         const auto anim_scale_id = window_ptr->GetID(ICB_PREFIX "AnimScale");
         float anim_scale = window_ptr->StateStorage.GetFloat(anim_scale_id);
@@ -131,7 +130,26 @@ IMGUI_API bool ImGui::BeginCoolBar(const char* vLabel, ImCoolBarFlags vCBFlags, 
                 anim_scale -= vConfig.anim_step;
             }
         }
-        window_ptr->StateStorage.SetFloat(anim_scale_id, ImClamp(anim_scale, 0.0f, 1.0f));
+
+        anim_scale = ImClamp(anim_scale, 0.0f, 1.0f);
+        window_ptr->StateStorage.SetFloat(anim_scale_id, anim_scale);
+        
+        // --- Position with predicted cross-axis size for THIS frame ---
+        ImVec2 pad = ImGui::GetStyle().WindowPadding * 2.0f;
+        ImVec2 bar_size = window_ptr->ContentSize + pad; // along main axis ok
+        const float normal_size  = window_ptr->StateStorage.GetFloat(window_ptr->GetID(ICB_PREFIX "NormalSize"));
+        const float hovered_size = window_ptr->StateStorage.GetFloat(window_ptr->GetID(ICB_PREFIX "HoveredSize"));
+        const float cross = getBarSize(normal_size, hovered_size, anim_scale);
+        if (vCBFlags & ImCoolBarFlags_Horizontal) {
+            bar_size.y = cross + pad.y;
+        } else {
+            bar_size.x = cross + pad.x;
+        }
+        const ImGuiViewport* vp = window_ptr->Viewport;
+        ImVec2 new_pos = vp->Pos + (vp->Size - bar_size) * vConfig.anchor;
+        new_pos.x = ImFloor(new_pos.x);
+        new_pos.y = ImFloor(new_pos.y);
+        ImGui::SetWindowPos(new_pos);
     }
 
     return res;
@@ -149,7 +167,7 @@ IMGUI_API bool ImGui::CoolBarItem() {
     const auto item_index_id = window_ptr->GetID(ICB_PREFIX "ItemIdx");
     const auto idx = window_ptr->StateStorage.GetInt(item_index_id);
     const auto coolbar_item_id = window_ptr->GetID(window_ptr->ID + idx + 1);
-    const auto current_item_size = window_ptr->StateStorage.GetFloat(coolbar_item_id);
+    float current_item_size = window_ptr->StateStorage.GetFloat(coolbar_item_id);
     const auto flags             = window_ptr->StateStorage.GetInt(window_ptr->GetID(ICB_PREFIX "Flags"));
     const auto anim_scale        = window_ptr->StateStorage.GetFloat(window_ptr->GetID(ICB_PREFIX "AnimScale"));
     const auto normal_size       = window_ptr->StateStorage.GetFloat(window_ptr->GetID(ICB_PREFIX "NormalSize"));
@@ -172,6 +190,8 @@ IMGUI_API bool ImGui::CoolBarItem() {
     if (isWindowHovered(window_ptr)) {
         last_mouse_pos = getChannel(ImGui::GetMousePos(), flags);
     }
+    
+    if (current_item_size <= 0.0f) current_item_size = normal_size;
 
     if (anim_scale > 0.0f) {
         const auto csp = getChannel(ImGui::GetCursorScreenPos(), flags);
@@ -181,8 +201,8 @@ IMGUI_API bool ImGui::CoolBarItem() {
         const float diff_pos = (last_mouse_pos - btn_center) / ws;
         current_size = getHoverSize(diff_pos, normal_size, hovered_size, effect_strength, anim_scale);
         const float anchor = window_ptr->StateStorage.GetFloat(window_ptr->GetID(ICB_PREFIX "Anchor"));
-        const float bar_height = getBarSize(window_ptr, normal_size, hovered_size, anim_scale);
-        float btn_offset = (bar_height - current_size) * anchor + wp;
+        const float bar_height = getBarSize(normal_size, hovered_size, anim_scale);
+        float btn_offset = ImFloor((bar_height - current_size) * anchor + wp);
         if (flags & ImCoolBarFlags_Horizontal) {
             ImGui::SetCursorPosY(btn_offset);
         } else if (flags & ImCoolBarFlags_Vertical) {
