@@ -12,3 +12,7 @@ set_target_properties(implot PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(implot PROPERTIES FOLDER 3rdparty)
 
 set(IMPLOT_LIBRARIES implot)
+
+if (MSVC)
+	set_property(TARGET implot PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()

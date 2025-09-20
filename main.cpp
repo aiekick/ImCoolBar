@@ -13,6 +13,7 @@
 #include "3rdparty/imgui/backends/imgui_impl_glfw.h"
 #include <ImCoolBar/ImCoolBar.h>
 #include "CustomFont.cpp"
+#include <functional>
 #include <stdio.h>
 #include <sstream>
 #include <fstream>
@@ -21,7 +22,7 @@
 #include <vector>
 #include <array>
 
-#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION 
 #include "stb_image.h"
 
 // About Desktop OpenGL function loaders:
@@ -115,27 +116,16 @@ struct AppDatas {
     TexturesContainer textures;
 };
 
-void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabel, const ImCoolBarFlags& vFlags = ImCoolBarFlags_Vertical, const ImGui::ImCoolBarConfig& vConfig = {}) {
+void drawCoolBar(AppDatas& vAppDatas,
+                 const size_t& vMaxIcons,
+                 const char* vLabel,
+                 const ImCoolBarFlags& vFlags = ImCoolBarFlags_Vertical,
+                 const ImGui::ImCoolBarConfig& vConfig = {}) {
     ImGui::SetNextWindowBgAlpha(0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     bool opened = ImGui::BeginCoolBar(vLabel, vFlags, vConfig);
     ImGui::PopStyleVar();
     if (opened) {
-        auto window = ImGui::GetCurrentWindow();
-        if (window) {
-            // correct the rect of the window. maybe a bug on imgui..
-            // the workrect can cause issue when clikc a timeline
-            // channel close button when close to the toolbar
-            // this thing correct the issue
-            const auto& rc            = window->Rect();
-            window->WorkRect          = rc;
-            window->OuterRectClipped  = rc;
-            window->InnerRect         = rc;
-            window->InnerClipRect     = rc;
-            window->ParentWorkRect    = rc;
-            window->ClipRect          = rc;
-            window->ContentRegionRect = rc;
-        }
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2());
         size_t idx = 0U;
         for (const auto& arr : vAppDatas.textures) {
@@ -146,8 +136,10 @@ void drawCoolBar(AppDatas& vAppDatas, const size_t& vMaxIcons, const char* vLabe
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4());
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2());
 #endif
-                    float w = ImGui::GetCoolBarItemWidth() - ImGui::GetStyle().FramePadding.x * 2.0f;
-                    bool res = ImGui::ImageButton(arr.first.c_str(), (ImTextureID)(size_t)arr.second, ImVec2(w, w));
+                    float w = ImGui::GetCoolBarItemWidth();
+                    ImTextureRef tex;
+                    tex._TexID = arr.second;
+                    bool res = ImGui::ImageButton(arr.first.c_str(), tex, ImVec2(w, w));
 #ifndef ENABLE_IMCOOLBAR_DEBUG
                     ImGui::PopStyleVar();
                     ImGui::PopStyleColor(2);
@@ -195,31 +187,28 @@ int main(int, char**) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;    // Enable Docking
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;  // Enable Multi-Viewport / Platform Windows
-    io.FontAllowUserScaling = true;  // zoom wiht ctrl + mouse wheel
+    
+    ImGuiContext& g = *GImGui;
+    g.IO.FontAllowUserScaling = true;  // zoom with ctrl + mouse wheel
+
 
     // Setup Dear ImGui style
-    // ImGui::StyleColorsDark();
-    ImGui::StyleColorsClassic();
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // load icon font file (CustomFont.cpp)
-    ImGui::GetIO().Fonts->AddFontDefault();
+    g.IO.Fonts->AddFontDefault();
     static const ImWchar icons_ranges[] = {ICON_MIN_IGFD, ICON_MAX_IGFD, 0};
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
-    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFD, 50.0f, &icons_config, icons_ranges);
+    g.IO.Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFD, 50.0f, &icons_config, icons_ranges);
 
-    const std::vector<std::string> icons_name = {
+    const std::array<std::string, 11> icons_name = {
         "Settings",   //
         "Activa",     //
         "Magnet",     //
@@ -252,12 +241,15 @@ int main(int, char**) {
         drawBackground(background_id);
 
         static ImGui::ImCoolBarConfig _config;
-        _config.normal_size = 50.0f;
+        _config.normal_size = 30.0f;
         _config.hovered_size = 200.0f;
         _config.anchor = ImVec2(0.5f, 1.0f);
+        _config.anim_step = 0.05f;
 #ifdef ENABLE_IMCOOLBAR_DEBUG
-        _config.anim_step = 0.005;
+        _config.anim_step = 0.005f;
 #endif
+
+        const float& ref_font_scale = g.FontSizeBase;
 
         _config.anchor = ImVec2(0.5f, 0.0f);
         drawCoolBar(_appDatas, 11, "Top##CoolBarMainWin", ImCoolBarFlags_Horizontal, _config);
@@ -268,84 +260,33 @@ int main(int, char**) {
         _config.anchor = ImVec2(1.0f, 0.5f);
         drawCoolBar(_appDatas, 6, "Right##CoolBarMainWin", ImCoolBarFlags_Vertical, _config);
 
-        const float& ref_font_scale = ImGui::GetIO().Fonts->Fonts[0]->Scale;
-
-        auto coolbar_button = [ref_font_scale](const char* label) -> bool {
-            float w = ImGui::GetCoolBarItemWidth();
-            auto font_ptr = ImGui::GetIO().Fonts->Fonts[0];
-            ImGui::PushFont(font_ptr);
-            font_ptr->Scale = ImGui::GetCoolBarItemScale();
-            const auto res = ImGui::Button(label, ImVec2(w, w));
-            font_ptr->Scale = ref_font_scale;
-            ImGui::PopFont();
-            return res;
-        };
-
         _config.normal_size = 25.0f;
         _config.anchor = ImVec2(0.5f, 1.0f);
-        ImGui::GetIO().Fonts->Fonts[0]->Scale = ref_font_scale;
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings;
-        if (ImGui::BeginViewportSideBar("BottomBar", ImGui::GetMainViewport(), ImGuiDir_Down, 40.0f, window_flags)) {
-            if (ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBarFlags_Horizontal, _config)) {
-                auto window = ImGui::GetCurrentWindow();
-                if (window) {
-                    // correct the rect of the window. maybe a bug on imgui !?
-                    // the workrect can cause issue when click around
-                    // this thing correct the issue
-                    const auto& rc = window->Rect();
-                    window->WorkRect = rc;
-                    window->OuterRectClipped = rc;
-                    window->InnerRect = rc;
-                    window->InnerClipRect = rc;
-                    window->ParentWorkRect = rc;
-                    window->ClipRect = rc;
-                    window->ContentRegionRect = rc;
-                }
+        static std::array<const char*, 13U> arr = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"};
+        bool opened = ImGui::BeginCoolBar("Bottom##CoolBarMainWin", ImCoolBarFlags_Horizontal, _config);
+        if (opened) {
+            for (size_t idx = 0U; idx < 13; ++idx) {
                 if (ImGui::CoolBarItem()) {
-                    coolbar_button("A");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("B");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("C");
-                }
-                if (ImGui::CoolBarItem()) {
-                    if (coolbar_button("D")) {
-                        _appDatas.show_imcoolbar_metrics = !_appDatas.show_imcoolbar_metrics;
+                    const char* label = arr.at(idx);
+                    float w = ImGui::GetCoolBarItemWidth();
+                    float s = ImGui::GetCoolBarItemScale();
+                    ImGui::PushFont(nullptr, ref_font_scale * s);
+                    const auto ret = ImGui::Button(label, ImVec2(w, w));
+                    ImGui::PopFont();
+#ifdef _DEBUG
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("scale : %.2f\nwidth : %.2f", s, w);
+                    }
+#endif
+                    if (ret) {
+                        if (idx == 3) { // 'D'
+                            _appDatas.show_imcoolbar_metrics = !_appDatas.show_imcoolbar_metrics;
+                        }
                     }
                 }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("E");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("F");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("G");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("H");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("I");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("J");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("K");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("L");
-                }
-                if (ImGui::CoolBarItem()) {
-                    coolbar_button("M");
-                }
-                ImGui::EndCoolBar();
             }
+            ImGui::EndCoolBar();
         }
-        ImGui::End();
 
         if (_appDatas.show_app_metrics) {
             ImGui::ShowMetricsWindow(&_appDatas.show_app_metrics);
@@ -376,7 +317,7 @@ int main(int, char**) {
         // Update and Render additional Platform Windows
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
         //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        if (g.IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();

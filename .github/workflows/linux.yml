@@ -1,0 +1,51 @@
+name: linux
+
+on:
+  push:
+    branches:
+      - DemoApp
+
+permissions:
+  contents: write
+
+jobs:
+  build_Linux_Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Install OpenGL lib / Requirement for GLFW3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev libx11-dev libxi-dev libxrandr-dev \
+            libxinerama-dev libxcursor-dev libwayland-dev
+
+      - name: configure
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: build + package
+        run: |
+          cmake --build build --config Release
+          cmake --build build --config Release --target package
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImCoolBarApp_linux_x64
+          path: ImCoolBarApp_*
+          if-no-files-found: warn
+
+      - name: Upload to DRAFT release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly-draft
+          name: Nightly Draft
+          draft: true
+          prerelease: false
+          overwrite: true
+          files: ImCoolBarApp_*

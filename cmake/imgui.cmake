@@ -23,3 +23,6 @@ set_target_properties(imgui PROPERTIES FOLDER 3rdparty)
 
 set(IMGUI_LIBRARIES imgui)
 
+if (MSVC)
+	set_property(TARGET imgui PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()

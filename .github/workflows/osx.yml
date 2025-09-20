@@ -1,0 +1,43 @@
+name: osx
+
+on:
+  push:
+    branches:
+      - DemoApp
+
+permissions:
+  contents: write
+
+jobs:
+  build_osx:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: build + package
+        run: |
+          cmake --build build --config Release
+          cmake --build build --config Release --target package
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImCoolBarApp_osx_x64
+          path: ImCoolBarApp_*
+          if-no-files-found: warn
+
+      - name: Upload to DRAFT release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly-draft
+          name: Nightly Draft
+          draft: true
+          prerelease: false
+          overwrite: true
+          files: ImCoolBarApp_*
