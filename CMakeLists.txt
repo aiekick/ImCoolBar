@@ -73,15 +73,17 @@ add_definitions(${GLFW_DEFINITIONS})
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 file(GLOB MAIN_SOURCES ${CMAKE_SOURCE_DIR}/main.cpp)
+file(GLOB_RECURSE FRAME_SOURCES ${CMAKE_SOURCE_DIR}/src/*.*)
 file(GLOB RES_SOURCES 
-		${CMAKE_SOURCE_DIR}/CustomFont.cpp 
-		${CMAKE_SOURCE_DIR}/CustomFont.h)
+	${CMAKE_SOURCE_DIR}/CustomFont.cpp 
+	${CMAKE_SOURCE_DIR}/CustomFont.h)
 file(GLOB IMGUIIMPL_SOURCES 
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.cpp
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.h
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.cpp
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.h)
+	${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.cpp
+	${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.h
+	${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.cpp
+	${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.h)
 source_group(main FILES ${MAIN_SOURCES})
+source_group(src\\Frame FILES ${FRAME_SOURCES})
 source_group(src\\Custom FILES ${CUSTOM_SOURCES})
 source_group(src\\Res FILES ${RES_SOURCES})
 source_group(src\\ImGuiImpl FILES ${IMGUIIMPL_SOURCES})
@@ -107,6 +109,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/ImCoolBar EXCLUDE_FROM_ALL)
 add_executable(${PROJECT}
 	${RES_SOURCES}
 	${MAIN_SOURCES}
+	${FRAME_SOURCES}
 	${CUSTOM_SOURCES}
 	${IMGUIIMPL_SOURCES}
 )
