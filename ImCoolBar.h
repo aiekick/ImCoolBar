@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include "imgui.h"
 
+//#define ENABLE_IMCOOLBAR_DEBUG
+
 typedef int ImCoolBarFlags;                //
 enum ImCoolBarFlags_ {                     //
     ImCoolBarFlags_None       = 0,         //
